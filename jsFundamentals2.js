@@ -87,26 +87,6 @@ function getLearnerData(course, ag, submissions) {
   let learnerDataDraft = [];
   const learnerDataResult = [];
   
-//   for (let i = 0; i < submissions.length; i++){
-//     console.log(submissions[i].learner_id)
-
-//     if ((submissions[i].learner_id) === (learnerDataResult[i-1].learner_id)) {
-//         continue;
-//     }
-//     else {
-//         let testObj1 = {
-//             id: submissions[i].learner_id,
-//             total_average: 0,
-//             //update assignments to change depending on assignment count in assignment group
-//             assignment1_average: 0,
-//             assignment2_average: 0,
-//             assignment3_average: 0
-//         }
-//         learnerDataResult.push(testObj1)
-//     }
-
-//   }
-  
   submissions.forEach(
     (submissionObj) => {
         // if id of proposed submission is the same as a previous submission, update avr n stuff
@@ -118,6 +98,7 @@ function getLearnerData(course, ag, submissions) {
             submitDate: submissionObj.submitted_at,
             submitScore: submissionObj.submission.score,
             scoreSum: 0,
+            maxScoreSum: 0,
             total_average: 0,
             assignment1_average: 0,
             assignment2_average: 0,
@@ -132,20 +113,27 @@ function getLearnerData(course, ag, submissions) {
   console.log(learnerDataDraft);
 
   let count = 0;
-  //learnerDataResult.push(learnerDataDraft[0])
 
   learnerDataDraft.forEach(
     (learnerSubmit) => {
         if (learnerDataResult == "") {
             learnerDataResult.push(learnerSubmit)
             learnerDataResult[count].scoreSum += learnerSubmit.submitScore
+            learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+            console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
         }
         else if (learnerDataResult[count].id == learnerSubmit.id) {
             learnerDataResult[count].scoreSum += learnerSubmit.submitScore
+            learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+            console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
+            learnerDataResult[count].total_average = learnerDataResult[count].scoreSum/learnerDataResult[count].maxScoreSum
         }
         else if (learnerDataResult[count].id !== learnerSubmit.id) {
             learnerDataResult.push(learnerSubmit)
+            learnerDataResult[count].total_average = learnerDataResult[count].scoreSum/learnerDataResult[count].maxScoreSum
             count++
+            learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+            console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
             learnerDataResult[count].scoreSum += learnerSubmit.submitScore
         }
         else {
@@ -153,63 +141,6 @@ function getLearnerData(course, ag, submissions) {
         }
     }
   )
-  
-  //START HERE TO PULL PREVIOUS CODE
-//   for (let i = 0; i < learnerDataDraft.length; i++){
-
-//     // let learnerIdMatch1 = learnerDataDraft[i].id
-//     // let learnerIdMatch2 = learnerDataDraft[i].id
-
-//     for (let g = i; g < learnerDataDraft.length; g++) {
-//       // let learnerIdMatch2 = learnerDataDraft[g].id
-
-//       // if (learnerDataDraft[i].id !== learnerDataDraft[g].id) (learnerDataDraft[i].id !== learnerDataDraft[g].id) && 
-//       if ((i == g)) {
-//         // console.log("This prints if a new learner submits")
-//         // console.log("new learner submission\ni = " + i + "\ng = " + g)
-//         console.log("This prints for the first learner submission in the draft")
-//         console.log(learnerDataDraft[g])
-//         // console.log(learnerDataDraft.length)
-//         learnerDataResult.push(learnerDataDraft[g])
-//         continue;
-//       }
-//       else if (learnerDataDraft[i].id !== learnerDataDraft[g].id) {
-//         console.log("This prints if a new learner submits")
-//         console.log("new learner submission\ni = " + i + "\ng = " + g)
-//         console.log(learnerDataDraft)
-//         console.log(learnerDataDraft.length)
-//         learnerDataResult.push(learnerDataDraft[g])
-//         break;
-//       }
-//       else {
-//         console.log("This prints if a duplicate learner submits")
-//         console.log("duplicate learner submission\ni = " + i + "\ng = " + g)
-//         //data manipulation code
-//         console.log(learnerDataDraft.splice(g, 1))
-//         learnerDataDraft.splice(g, 1) 
-//         console.log(learnerDataDraft)
-//         console.log(learnerDataDraft.length)
-//         learnerDataResult[i].scoreSum += learnerDataDraft[g].submitScore
-//       }
-//     }
-
-//     // if ((learnerDataDraft[i].id) === (learnerDataDraft[i-1].id)) {
-//     //     continue;
-//     // }
-//     // else {
-//     //     let testObj1 = {
-//     //         id: submissions[i].learner_id,
-//     //         total_average: 0,
-//     //         //update assignments to change depending on assignment count in assignment group
-//     //         assignment1_average: 0,
-//     //         assignment2_average: 0,
-//     //         assignment3_average: 0
-//     //     }
-//     //     learnerDataResult.push(testObj1)
-//     // }
-
-//   }
-  //END HERE FOR PREVIOUS CODE
 
 
 
