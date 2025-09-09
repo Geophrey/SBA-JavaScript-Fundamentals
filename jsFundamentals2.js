@@ -84,7 +84,7 @@ function getLearnerData(course, ag, submissions) {
   // every object will hold the learners ID, the learner's total weighted avr,---
   // --- the percentage score of each of the learner's completed assignments, ---
   // --- if the assignment is not due, do not include it ANYWHERE smh
-  let learnerDataDraft = [];
+  const learnerDataDraft = [];
   const learnerDataResult = [];
   
   submissions.forEach(
@@ -100,9 +100,8 @@ function getLearnerData(course, ag, submissions) {
             scoreSum: 0,
             maxScoreSum: 0,
             total_average: 0,
-            assignment1_average: 0,
-            assignment2_average: 0,
-            assignment3_average: 0
+            assignmentIdList: [],
+            assignmentsScoreList: []
         }
 
         learnerDataDraft.push(testObj1)
@@ -117,14 +116,19 @@ function getLearnerData(course, ag, submissions) {
   learnerDataDraft.forEach(
     (learnerSubmit) => {
         if (learnerDataResult == "") {
+          // learnerSubmit.assignmentsIdAvr.push()
             learnerDataResult.push(learnerSubmit)
             learnerDataResult[count].scoreSum += learnerSubmit.submitScore
             learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+            learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
+            learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
             console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
         }
         else if (learnerDataResult[count].id == learnerSubmit.id) {
             learnerDataResult[count].scoreSum += learnerSubmit.submitScore
             learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+            learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
+            learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
             console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
             learnerDataResult[count].total_average = learnerDataResult[count].scoreSum/learnerDataResult[count].maxScoreSum
         }
@@ -133,6 +137,8 @@ function getLearnerData(course, ag, submissions) {
             learnerDataResult[count].total_average = learnerDataResult[count].scoreSum/learnerDataResult[count].maxScoreSum
             count++
             learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+            learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
+            learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
             console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
             learnerDataResult[count].scoreSum += learnerSubmit.submitScore
         }
