@@ -1,0 +1,10 @@
+READ ME
+--------------------------------------------------------
+-This is a JavaScript file that demonstrates JavaScript utilities that let the developer access, manipulate, remove data, invoke functions, and more
+
+-The data that is being used is an array of fake learner assignments, learner assignments group objects, and more
+
+-The code returns a function that will display in the console an array of objects representing individual learners, the total weighted average and score for their assignments
+
+-It has 3 functioning webpages: A home page, a showcase page, and a quizzing page
+
