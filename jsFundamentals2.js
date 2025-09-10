@@ -93,22 +93,47 @@ function getLearnerData(course, ag, submissions) {
         // this is to make sure students submisisons are matched to them and not creating duplicate student objects
         // if (submissionObj.learner_id === learnerDataResult)
         let testObj1 = {
-            id: submissionObj.learner_id,
+            learnerId: submissionObj.learner_id,
             assignmentID: submissionObj.assignment_id,
-            submitDate: submissionObj.submitted_at,
+            submitDate: submissionObj.submission.submitted_at,
             submitScore: submissionObj.submission.score,
             scoreSum: 0,
             maxScoreSum: 0,
             total_average: 0,
             assignmentIdList: [],
-            assignmentsScoreList: []
+            assignmentsScoreList: [],
+            // assignmentsScoreList: []
         }
 
         learnerDataDraft.push(testObj1)
     }
   )
-  let learnerDataDraft0 = learnerDataDraft
-  console.log(learnerDataDraft0)
+
+  function dueDateCheck(lnrDateStr, agDateStr) {
+    let lnrDateArray = lnrDateStr.split("-")
+    let agDateArray = agDateStr.split("-")
+    // console.log(lnrDateArray)
+    // console.log(agDateArray)
+    let acceptAssignment = true
+
+    
+    for (let z = 0; z < lnrDateArray.length; z++) {
+      if (lnrDateArray[z] == agDateArray[z]) {
+        continue;
+      }
+      else if (lnrDateArray[z] < agDateArray[z]) {
+        acceptAssignment = false;
+        break;
+      }
+      else {
+        acceptAssignment = true;
+        break;
+      }
+    }
+
+    return acceptAssignment;
+  }
+
   console.log(learnerDataDraft);
 
   let count = 0;
@@ -116,31 +141,41 @@ function getLearnerData(course, ag, submissions) {
   learnerDataDraft.forEach(
     (learnerSubmit) => {
         if (learnerDataResult == "") {
-          // learnerSubmit.assignmentsIdAvr.push()
             learnerDataResult.push(learnerSubmit)
-            learnerDataResult[count].scoreSum += learnerSubmit.submitScore
-            learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
-            learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
-            learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
+
+            if (dueDateCheck(learnerSubmit.submitDate, ag.assignments[(learnerSubmit.assignmentID-1)].due_at) == true) {
+              learnerDataResult[count].scoreSum += learnerSubmit.submitScore
+              learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+              learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
+              learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
+            }
+
             console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
         }
-        else if (learnerDataResult[count].id == learnerSubmit.id) {
-            learnerDataResult[count].scoreSum += learnerSubmit.submitScore
-            learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
-            learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
-            learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
+        else if (learnerDataResult[count].learnerId == learnerSubmit.learnerId) {
+
+            if (dueDateCheck(learnerSubmit.submitDate, ag.assignments[(learnerSubmit.assignmentID-1)].due_at) == true) {
+              learnerDataResult[count].scoreSum += learnerSubmit.submitScore
+              learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+              learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
+              learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
+            }
+
             console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
             learnerDataResult[count].total_average = learnerDataResult[count].scoreSum/learnerDataResult[count].maxScoreSum
         }
-        else if (learnerDataResult[count].id !== learnerSubmit.id) {
+        else if (learnerDataResult[count].learnerId !== learnerSubmit.learnerId) {
             learnerDataResult.push(learnerSubmit)
             learnerDataResult[count].total_average = learnerDataResult[count].scoreSum/learnerDataResult[count].maxScoreSum
             count++
-            learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
-            learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
-            learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
-            console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
-            learnerDataResult[count].scoreSum += learnerSubmit.submitScore
+
+            if (dueDateCheck(learnerSubmit.submitDate, ag.assignments[(learnerSubmit.assignmentID-1)].due_at) == true) {
+              learnerDataResult[count].maxScoreSum += ag.assignments[(learnerSubmit.assignmentID-1)].points_possible
+              learnerDataResult[count].assignmentIdList.push(learnerSubmit.assignmentID)
+              learnerDataResult[count].assignmentsScoreList.push(ag.assignments[(learnerSubmit.assignmentID-1)].points_possible)
+              console.log("The assignment worth -"+ag.assignments[(learnerSubmit.assignmentID-1)].points_possible+" pts- was added")
+              learnerDataResult[count].scoreSum += learnerSubmit.submitScore
+            }
         }
         else {
             console.log("something's wrong again jeff :(")
@@ -148,7 +183,21 @@ function getLearnerData(course, ag, submissions) {
     }
   )
 
-
+  const learnerDataFormatted = [];
+  for (let y = 0; y < learnerDataResult.length; y++) {
+    let tempObj = {
+      learner_id: learnerDataResult[y].learnerId,
+      learner_weight_average: ((Math.round((learnerDataResult[y].total_average)*1000))/10)+"%",
+      learner_submissions: "assignment id: "+learnerDataResult[y].assignmentID+"; assignment score: "+learnerDataResult[y].submitScore/ag.assignments[(learnerDataResult[y].assignmentID)-1].points_possible
+      // [
+      //   {
+      //     assignment_ID: learnerDataResult[y].assignmentID,
+      //     assignment_score: learnerDataResult[y].submitScore/ag.assignments[(learnerDataResult[y].assignmentID)-1].points_possible
+      //   }
+      // ]
+    }
+    learnerDataFormatted.push(tempObj)
+  }
 
   console.log("Below is the length of the draft and the draft data")
   console.log(learnerDataDraft.length)
@@ -158,22 +207,7 @@ function getLearnerData(course, ag, submissions) {
   console.log(learnerDataResult)
 
 
-//   const result = [
-//     {
-//       id: 125,
-//       avg: 0.985, // (47 + 150) / (50 + 150)
-//       1: 0.94, // 47 / 50
-//       2: 1.0 // 150 / 150
-//     },
-//     {
-//       id: 132,
-//       avg: 0.82, // (39 + 125) / (50 + 150)
-//       1: 0.78, // 39 / 50
-//       2: 0.833 // late: (140 - 15) / 150
-//     }
-//   ];
-
-  return learnerDataResult;
+  return learnerDataFormatted;
 }
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
